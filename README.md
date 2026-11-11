@@ -139,6 +139,18 @@ sudo systemctl enable --now wifimonitor
 
 Don't run `wifimonitor` manually while the service is running; two copies would write to the same log.
 
+## Analyzing the logs
+
+`Analyze.java` reads every `outages-YYYY-MM.txt` file and prints a report: outage count, total, average, median and longest downtime, uptime percentage, a breakdown by month, hour of day, day of week and date, and the five longest outages. Outages where the Pi itself lost Wi-Fi (`WIFI-DISCONNECTED` or `NOTE` lines) are listed separately and left out of the statistics.
+
+Copy `Analyze.java` to the Pi and run it with no compile step:
+
+```
+java Analyze.java
+```
+
+It reads `~/outages` by default. To read another folder, for example log files copied to another computer, pass it as an argument: `java Analyze.java path/to/outages`.
+
 ## Notes and limitations
 
 - **Minimum outage length:** because of the 4-failure threshold, outages shorter than roughly 10–15 seconds are not recorded.
