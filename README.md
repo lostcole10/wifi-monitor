@@ -6,8 +6,9 @@ A small Java program that runs on a Raspberry Pi and logs Wi-Fi internet outages
 
 - Every 3 seconds, the program pings `1.1.1.1` (Cloudflare) and `8.8.8.8` (Google) through the Wi-Fi interface (`ping -I wlan0`). A check fails only if neither host replies.
 - After 4 consecutive failed checks, the connection is considered down. The outage start time is taken from the first failed check.
-- While the connection is down, a `DOWN` line is written on every check. When a check succeeds again, an `UP` line and the total downtime are written.
-- Logs go to `~/outages/outages-YYYY-MM.txt`, with a new file each month. Timestamps are in local Alberta,Canada time (`America/Edmonton`).
+- When the outage is confirmed, a single `DOWN` line is written. When a check succeeds again, an `UP` line and the total downtime are written.
+- If the Pi itself loses its Wi-Fi connection during an outage (`wlan0` is not up), a `WIFI-DISCONNECTED` line is written, and `WIFI-RECONNECTED` when it comes back. Outages with these lines may be a problem with the Pi rather than the internet.
+- Logs go to `~/outages/outages-YYYY-MM.txt`, with a new file each month. An outage that runs past the end of a month continues in the new month's file with a `CONTINUED` line. Timestamps are in local Alberta,Canada time (`America/Edmonton`).
 
 ### Example log
 
@@ -15,11 +16,11 @@ A small Java program that runs on a Raspberry Pi and logs Wi-Fi internet outages
 status  timestamp
 START 2026-10-09T21:38:22-06:00
 DOWN 2026-10-09T21:38:31-06:00
-DOWN 2026-10-09T21:38:34-06:00
-...
 UP 2026-10-09T21:39:44-06:00
 ---Total downtime = 1m22s ---
 ```
+
+Outages of an hour or more show hours too, for example `2h5m0s`.
 
 ## Requirements
 
@@ -61,7 +62,7 @@ sudo chmod +x /usr/local/bin/wifimonitor
 mkdir ~/outages
 ```
 
-The program does not create this folder itself.
+The program also creates this folder itself if it is missing.
 
 ### 4. Network setup
 
@@ -97,7 +98,7 @@ nmcli radio wifi off
 nmcli radio wifi on
 ```
 
-Stop the program with Ctrl+C and check that the log shows START, DOWN, UP, and the total downtime.
+Stop the program with Ctrl+C and check that the log shows START, DOWN, WIFI-DISCONNECTED, WIFI-RECONNECTED, UP, and the total downtime.
 
 ### 6. Run as a service
 
